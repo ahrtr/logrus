@@ -54,8 +54,15 @@ type TextFormatter struct {
 	// be desired.
 	DisableSorting bool
 
-	// QuoteEmptyFields will wrap empty fields in quotes if true
+	// DisableQuoteFields will not wrap fields in quotes if true
+	DisableQuoteFields bool
+	
+	// QuoteEmptyFields will wrap empty fields in quotes if true. 
+	// It's only valid when QuoteEmptyFields is false.
 	QuoteEmptyFields bool
+	
+	// Do not include key fields (i.e., time, level, msg) in the log entry if true
+	DisableKeyFields bool
 
 	// Whether the logger's out is to a terminal
 	isTerminal bool
@@ -109,14 +116,33 @@ func (f *TextFormatter) Format(entry *Entry) ([]byte, error) {
 		f.printColored(b, entry, keys, timestampFormat)
 	} else {
 		if !f.DisableTimestamp {
-			f.appendKeyValue(b, "time", entry.Time.Format(timestampFormat))
+			if f.DisableKeyFields {
+				f.appendValue(b, entry.Time.Format(timestampFormat))
+			} else {
+				f.appendKeyValue(b, "time", entry.Time.Format(timestampFormat))
+			}
 		}
-		f.appendKeyValue(b, "level", entry.Level.String())
+		
+		if f.DisableKeyFields {
+			f.appendValue(b, entry.Level.String())
+		} else {
+			f.appendKeyValue(b, "level", entry.Level.String())
+		}
+		
 		if entry.Message != "" {
-			f.appendKeyValue(b, "msg", entry.Message)
+			if f.DisableKeyFields {
+				f.appendValue(b, entry.Message)
+			} else {
+				f.appendKeyValue(b, "msg", entry.Message)
+			}
 		}
 		for _, key := range keys {
 			f.appendKeyValue(b, key, entry.Data[key])
+			if f.DisableKeyFields {
+				f.appendValue(b, entry.Data[key])
+			} else {
+				f.appendKeyValue(b, "msg", entry.Data[key])
+			}			
 		}
 	}
 
@@ -154,6 +180,10 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *Entry, keys []strin
 }
 
 func (f *TextFormatter) needsQuoting(text string) bool {
+	if f.DisableQuoteFields {
+		return false
+	}
+
 	if f.QuoteEmptyFields && len(text) == 0 {
 		return true
 	}
@@ -178,6 +208,10 @@ func (f *TextFormatter) appendKeyValue(b *bytes.Buffer, key string, value interf
 }
 
 func (f *TextFormatter) appendValue(b *bytes.Buffer, value interface{}) {
+	if f.DisableKeyFields && b.Len() > 0 {
+		b.WriteByte(' ')
+	}
+
 	stringVal, ok := value.(string)
 	if !ok {
 		stringVal = fmt.Sprint(value)
