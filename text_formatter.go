@@ -54,11 +54,12 @@ type TextFormatter struct {
 	// be desired.
 	DisableSorting bool
 
-	// DisableQuoteFields will not wrap fields in quotes if true
+	// DisableQuoteFields will not wrap fields in quotes if true.
+	// Instead, the log message will be written directly. 
 	DisableQuoteFields bool
 	
 	// QuoteEmptyFields will wrap empty fields in quotes if true. 
-	// It's only valid when QuoteEmptyFields is false.
+	// It's only valid when DisableQuoteFields is false.
 	QuoteEmptyFields bool
 	
 	// Do not include key fields (i.e., time, level, msg) in the log entry if true
