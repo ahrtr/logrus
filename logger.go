@@ -112,6 +112,17 @@ func (logger *Logger) WithError(err error) *Entry {
 	return entry.WithError(err)
 }
 
+func (logger *Logger) Formatf(level Level, format string, args ...interface{}) (string, error) {
+	if logger.level() >= level {
+		entry := logger.newEntry()
+		str, err := entry.Formatf(level, format, args...)
+		logger.releaseEntry(entry)
+		return str, err
+	} else {
+		return "", nil
+	}
+}
+
 func (logger *Logger) Debugf(format string, args ...interface{}) {
 	if logger.level() >= DebugLevel {
 		entry := logger.newEntry()
@@ -172,6 +183,17 @@ func (logger *Logger) Panicf(format string, args ...interface{}) {
 		entry := logger.newEntry()
 		entry.Panicf(format, args...)
 		logger.releaseEntry(entry)
+	}
+}
+
+func (logger *Logger) Format(level Level, args ...interface{}) (string, error) {
+	if logger.level() >= level {
+		entry := logger.newEntry()
+		str, err := entry.Format(level, args...)
+		logger.releaseEntry(entry)
+		return str, err
+	} else {
+		return "", nil
 	}
 }
 

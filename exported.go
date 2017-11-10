@@ -72,6 +72,11 @@ func WithFields(fields Fields) *Entry {
 	return std.WithFields(fields)
 }
 
+// Format returns the formated log message on the standard logger
+func Format(level Level, args ...interface{}) (string, error) {
+	return std.Format(level, args...)
+}
+
 // Debug logs a message at level Debug on the standard logger.
 func Debug(args ...interface{}) {
 	std.Debug(args...)
@@ -110,6 +115,11 @@ func Panic(args ...interface{}) {
 // Fatal logs a message at level Fatal on the standard logger.
 func Fatal(args ...interface{}) {
 	std.Fatal(args...)
+}
+
+// Format returns the formated log message on the standard logger
+func Formatf(level Level, format string, args ...interface{}) (string, error) {
+	return std.Formatf(level, format, args...)
 }
 
 // Debugf logs a message at level Debug on the standard logger.
