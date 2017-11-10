@@ -129,6 +129,17 @@ func (entry Entry) log(level Level, msg string) {
 	}
 }
 
+func (entry *Entry) Format(level Level, args ...interface{}) (string, error) {	
+	if entry.Logger.level() >= level {
+		entry.Time = time.Now()
+		entry.Level = level
+		entry.Message = fmt.Sprint(args...)
+		return entry.String()
+	} else {
+		return "", nil
+	}
+}
+
 func (entry *Entry) Debug(args ...interface{}) {
 	if entry.Logger.level() >= DebugLevel {
 		entry.log(DebugLevel, fmt.Sprint(args...))
@@ -176,6 +187,17 @@ func (entry *Entry) Panic(args ...interface{}) {
 }
 
 // Entry Printf family functions
+
+func (entry *Entry) Formatf(level Level, format string, args ...interface{}) (string, error) {	
+	if entry.Logger.level() >= level {
+		entry.Time = time.Now()
+		entry.Level = level
+		entry.Message = fmt.Sprintf(format, args...)
+		return entry.String()
+	} else {
+		return "", nil
+	}
+}
 
 func (entry *Entry) Debugf(format string, args ...interface{}) {
 	if entry.Logger.level() >= DebugLevel {
